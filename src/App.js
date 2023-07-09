@@ -1,24 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import { createContext, useEffect, useReducer } from "react";
+import Header from "./components/header/Header";
+import { initialeState, reducer } from "./store/reducer";
+import MoviesList from "./components/movies/MoviesList";
+import { searchMovies } from "./components/api/movies";
 
+
+
+export const stateContext = createContext(initialeState);
 function App() {
+
+  const [state, dispatch] = useReducer(reducer, initialeState);
+  const { search , page }= state ;
+  useEffect(()=>{
+    (async ()=>{
+      
+      const {movies , error   } = await searchMovies(search , page  );
+
+      dispatch({
+        loading : false , 
+        movies , 
+        error 
+      })
+    })();
+  } , []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <stateContext.Provider value={{ state, dispatch }} >
+      <Header />
+      <div className="container">
+        <MoviesList />
+      </div>
+    </stateContext.Provider>
+
   );
 }
 
